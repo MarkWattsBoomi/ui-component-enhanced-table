@@ -9,7 +9,7 @@ class EnhancedTable extends React.Component<any, any>
     componentId: string = "";
     flowKey: string ="";    
     attributes : any = {};
-    selectedItem: any = null;
+    selectedItems: any = [];
     sortItem : any = null;
     sortDirection : any = null;
 
@@ -134,6 +134,11 @@ class EnhancedTable extends React.Component<any, any>
         var vals = [];
 
         //header row
+        //add spacer for multi select if needed
+        if(flowModel.isMultiSelect)
+        {
+            headers.push(<td className="et-table-header-checkbox"><input className="et-table-checkbox" type="checkbox" onClick={this.toggleSelectAll.bind(this)}></input></td>);
+        }
         // add button spacer if there are any row buttons
         //if there are buttons then add blank header
         if(rowButtons && rowButtons.length > 0)
@@ -191,6 +196,23 @@ class EnhancedTable extends React.Component<any, any>
 
             rowId = manywho.utils.getObjectDataProperty(row.properties, this.getAttribute("Row Key")).contentValue;
             vals = [];
+
+            //if the rowid is in selected then show checked
+            var checked : any;
+            if(this.selectedItems.indexOf(rowId) < 0)
+            {
+                checked = false;
+            }
+            else
+            {
+                checked = true;
+            }
+
+            if(flowModel.isMultiSelect)
+            {
+                vals.push(<td className="et-table-cell-checkbox"><input className="et-table-checkbox" type="checkbox" checked={checked} onClick={this.toggleSelectItem.bind(this)}></input></td>);
+            }
+
             vals.push(<td className="et-table-cell">{rowButtons}</td>);
             
             for(var iPos = 0 ; iPos < row.properties.length ; iPos++)
@@ -203,7 +225,7 @@ class EnhancedTable extends React.Component<any, any>
             }
 
             var className = "et-table-row";
-            if(this.selectedItem && this.selectedItem==rowId)
+            if(this.selectedItems && this.selectedItems.indexOf(rowId) >=0)
             {
                 className += " et-table-row-selected";
             }
@@ -235,12 +257,7 @@ class EnhancedTable extends React.Component<any, any>
                </div>
     }
 
-    //a row was selected, store it's id at component level and redraw
-    selectRow(event : any)
-    {
-        this.selectedItem=event.currentTarget.getAttribute('data-rowId');
-        this.forceUpdate();
-    }
+    
 
     //generic handler to trigger an outcome
     triggerOutcome(outcomeId : any, event : any)
@@ -289,6 +306,62 @@ class EnhancedTable extends React.Component<any, any>
         this.forceUpdate();
     }
 
+    toggleSelectAll(event : any)
+    {
+        if(event.currentTarget.checked)
+        {
+            //check all
+            const flowModel = manywho.model.getComponent(this.componentId,   this.flowKey);
+            for (var pos = 0; pos < flowModel.objectData.length ; pos++)
+            {
+                var row=flowModel.objectData[pos];
+
+                var rowId = manywho.utils.getObjectDataProperty(row.properties, this.getAttribute("Row Key")).contentValue;
+
+                if(this.selectedItems.indexOf(rowId) < 0)
+                {
+                    this.selectedItems.push(rowId);
+                }
+            }
+        }
+        else
+        {
+            this.selectedItems = [];
+        }
+        
+        this.forceUpdate();
+
+        return false;
+    }
+
+    //a row was selected, store it's id at component level and redraw
+    selectRow(event : any)
+    {
+        if(this.selectedItems.indexOf(event.currentTarget.getAttribute('data-rowId')) < 0)
+        {
+            this.selectedItems.push(event.currentTarget.getAttribute('data-rowId'));
+        }
+        this.forceUpdate();
+    }
+
+    toggleSelectItem(event : any)
+    {
+        var rowId=event.currentTarget.getAttribute('data-rowId') || event.currentTarget.parentElement.parentElement.getAttribute('data-rowId');
+        if(this.selectedItems.indexOf(rowId) < 0)
+        {
+            this.selectedItems.push(rowId);
+        }
+        else
+        {
+            var idx = this.selectedItems.indexOf(rowId);
+            this.selectedItems.splice(idx,1);
+        }
+        //this.sortItem = event.currentTarget.getAttribute('data-column-name');
+        event.stopPropagation();
+        this.forceUpdate();
+
+    }
+
     //helper to get a specific object data item given a field=value criteria 
     getObjectDataByKey(objectData : any, fieldName : string, value : string)
     {
@@ -306,6 +379,8 @@ class EnhancedTable extends React.Component<any, any>
         }
         return null;
     }
+
+
     
 }
 
