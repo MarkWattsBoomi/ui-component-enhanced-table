@@ -68,6 +68,7 @@ class EnhancedTable extends React.Component<any, any>
         var rowButtons = [];
 
         var dblClick : any;
+        var click : any;
         
         //loop over outcomes
         for(var oPos = 0 ; oPos < outcomes.length ; oPos++)
@@ -85,9 +86,23 @@ class EnhancedTable extends React.Component<any, any>
                 //must be a row button, it's action attribute will tell if it should be the DOUBLE-CLICK event
                 switch(outcome.attributes["action"])
                 {
-                    case "DOUBLE-CLICK":
-                        dblClick = outcome.id;
+                    case "CLICK":
+                        //cant have double click for multi select
+                        click = outcome.id;
+                        break;
 
+                    case "DOUBLE-CLICK":
+                        //cant have double click for multi select
+                        if(flowModel.isMultiSelect == false)
+                        {
+                            dblClick = outcome.id;
+                        }
+                        else
+                        {
+                            var icon = outcome.attributes["icon"] || "log-in";
+                            var className = "glyphicon glyphicon-" + icon + " et-button-bar-button";
+                            topbuttons.push(<span className={className} onClick={this.triggerOutcome.bind(this, outcome.id)} title={outcome.label}></span>)
+                        }
                         break;
 
                     default:
@@ -230,9 +245,20 @@ class EnhancedTable extends React.Component<any, any>
                 className += " et-table-row-selected";
             }
 
+            var title = "";
+            if(flowModel.isMultiSelect == true)
+            {
+                title= "Click to select, Double-Click to open";
+            }
+            else
+            {
+                title= "Click to select";
+            }
             //create row object, note we are binding select to its click and the dblclick value (an outcome id) to double click.  It may be null but thats fine
             var r = <tr className={className} data-rowId={rowId} data-objectData={row} 
-                        onClick={this.selectRow.bind(this)} onDoubleClick={this.triggerOutcome.bind(this,dblClick)}>{vals}</tr>;
+                        onClick={this.selectRow.bind(this,click)} 
+                        onDoubleClick={this.triggerOutcome.bind(this,dblClick)}
+                        title={title}>{vals}</tr>;
 
             rows.push(r);
         }
@@ -262,22 +288,35 @@ class EnhancedTable extends React.Component<any, any>
     //generic handler to trigger an outcome
     triggerOutcome(outcomeId : any, event : any)
     {
-        var rowId=event.currentTarget.getAttribute('data-rowId') || event.currentTarget.parentElement.parentElement.getAttribute('data-rowId');
+        //if no outcome id just quit
+        if(!outcomeId || outcomeId.length<1)
+        {
+            return;
+        }
+        var rowId : any;
         const flowModel = manywho.model.getComponent(this.componentId,   this.flowKey);
         var rowKeyField = this.getAttribute("Row Key");
 
-        var objectData=this.getObjectDataByKey(flowModel.objectData, rowKeyField, rowId);
+        var newState : any;
+        var objectDataArray = [];
+        var objectData : any;
 
-        //clone data
-		objectData = JSON.parse(JSON.stringify(objectData));
-		objectData.isSelected = true;
-		var newState = {
-			objectData: [objectData]
+        for(var key in this.selectedItems)
+        {
+            objectData=this.getObjectDataByKey(flowModel.objectData, rowKeyField, this.selectedItems[key]);
+            //clone data
+            objectData = JSON.parse(JSON.stringify(objectData));
+            objectData.isSelected = true;
+            objectDataArray.push(objectData);
+        }
+   
+        newState = {
+			objectData: objectDataArray
 		};
 		
 		manywho.state.setComponent(this.componentId, newState, this.flowKey, true);
 
-        if(objectData)
+        if(objectDataArray && objectDataArray.length > 0)
         {
             if(outcomeId)
             {
@@ -335,12 +374,21 @@ class EnhancedTable extends React.Component<any, any>
     }
 
     //a row was selected, store it's id at component level and redraw
-    selectRow(event : any)
+    selectRow(outcomeId : any, event : any)
     {
+        const flowModel = manywho.model.getComponent(this.componentId,   this.flowKey);
+        
+        if(flowModel.isMultiSelect == false)
+        {
+            //only one can be selected
+            this.selectedItems = [];
+        }
+
         if(this.selectedItems.indexOf(event.currentTarget.getAttribute('data-rowId')) < 0)
         {
             this.selectedItems.push(event.currentTarget.getAttribute('data-rowId'));
         }
+        this.triggerOutcome(outcomeId, event);
         this.forceUpdate();
     }
 
