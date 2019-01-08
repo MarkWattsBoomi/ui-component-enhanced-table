@@ -79,7 +79,7 @@ class EnhancedTable extends React.Component<any, any>
                 //top button
                 var icon = outcome.attributes["icon"] || "wrench";
                 var className = "glyphicon glyphicon-" + icon + " et-button-bar-button";
-                topbuttons.push(<span className={className} onClick={this.triggerOutcome.bind(this)} title={outcome.label}></span>)
+                topbuttons.push(<span className={className} onClick={this.triggerOutcome.bind(this, outcome.id)} title={outcome.label}></span>)
             }
             else
             {
@@ -328,7 +328,7 @@ class EnhancedTable extends React.Component<any, any>
 		
 		manywho.state.setComponent(this.componentId, newState, this.flowKey, true);
 
-        if(objectDataArray && objectDataArray.length > 0)
+        if(objectDataArray)
         {
             if(outcomeId)
             {
