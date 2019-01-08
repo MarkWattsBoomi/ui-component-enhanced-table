@@ -87,7 +87,6 @@ class EnhancedTable extends React.Component<any, any>
                 switch(outcome.attributes["action"])
                 {
                     case "CLICK":
-                        //cant have double click for multi select
                         click = outcome.id;
                         break;
 
@@ -106,11 +105,19 @@ class EnhancedTable extends React.Component<any, any>
                         break;
 
                     default:
-                        var icon = outcome.attributes["icon"] || "wrench";
-                        var className = "glyphicon glyphicon-" + icon + " et-button-bar-button";
-                        var button = <span className={className} onClick={this.triggerOutcome.bind(this, outcome.id)} title={outcome.label}></span>
-                        rowButtons.push(button);
-
+                        if(flowModel.isMultiSelect == false)
+                        {
+                            var icon = outcome.attributes["icon"] || "wrench";
+                            var className = "glyphicon glyphicon-" + icon + " et-button-bar-button";
+                            var button = <span className={className} onClick={this.triggerOutcome.bind(this, outcome.id)} title={outcome.label}></span>
+                            rowButtons.push(button);
+                        }
+                        else
+                        {
+                            var icon = outcome.attributes["icon"] || "wrench";
+                            var className = "glyphicon glyphicon-" + icon + " et-button-bar-button";
+                            topbuttons.push(<span className={className} onClick={this.triggerOutcome.bind(this, outcome.id)} title={outcome.label}></span>) 
+                        }
                         break;
                 }
             }
@@ -223,12 +230,17 @@ class EnhancedTable extends React.Component<any, any>
                 checked = true;
             }
 
+            //add either the check boxes or row buttons
             if(flowModel.isMultiSelect)
             {
                 vals.push(<td className="et-table-cell-checkbox"><input className="et-table-checkbox" type="checkbox" checked={checked} onClick={this.toggleSelectItem.bind(this)}></input></td>);
             }
+            else
+            {
+                vals.push(<td className="et-table-cell">{rowButtons}</td>);
+            }
 
-            vals.push(<td className="et-table-cell">{rowButtons}</td>);
+            
             
             for(var iPos = 0 ; iPos < row.properties.length ; iPos++)
             {

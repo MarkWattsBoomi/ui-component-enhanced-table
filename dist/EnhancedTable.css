@@ -27,7 +27,10 @@
 
 .et-button-bar-button
 {
-    margin-right: 5px;
+    margin-right: 10px;
+    font-size: 12pt;
+    color: #333;
+    vertical-align: middle;
 }
 
 .et-button-bar-button:hover

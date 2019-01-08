@@ -26,7 +26,11 @@ e.g.
 
 - outcomes flagged as bulk actions ("This outcome should appear at the top of the component") will be placed in the top title bar, others will be put in the first column which is an array of icon buttons.
 
+- one outcome from the row buttons can be flagged as being the click event, see attributes below.
+
 - one outcome from the row buttons can be flagged as being the double click event, see attributes below.
+
+If the component is set as multi-select then check boxes appear on each row, the double click event and all row buttons will move to top buttons
 
 
 ## Extra Configuration
@@ -39,5 +43,7 @@ You can add attributes to the component to control it's appearance: -
 You can add attribites to the component's outcomes to change their function and appearance: -
 
 - "icon"        optional        The name of a boostrap glyph icon to display for the button, just the name e.g. refresh, wrench etc.
+
+- "CLICK"        optional        Flags the outcome to be attached to the tables row click event.
 
 - "DOUBLE-CLICK"        optional        Flags the outcome to be attached to the tables row double click event.
