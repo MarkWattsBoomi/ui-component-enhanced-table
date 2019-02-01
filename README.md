@@ -47,3 +47,7 @@ You can add attribites to the component's outcomes to change their function and 
 - "action" = "CLICK"        optional        Flags the outcome to be attached to the tables row click event.
 
 - "action" = "DOUBLE-CLICK"        optional        Flags the outcome to be attached to the tables row double click event.
+
+You can add a componentType value to any column to make use of other react classes for that column like the ones defined in the ColumnControls library here: -
+https://github.com/MarkWattsBoomi/ui-component-table-column-formatters
+ 
