@@ -44,6 +44,6 @@ You can add attribites to the component's outcomes to change their function and 
 
 - "icon"        optional        The name of a boostrap glyph icon to display for the button, just the name e.g. refresh, wrench etc.
 
-- "CLICK"        optional        Flags the outcome to be attached to the tables row click event.
+- "action" = "CLICK"        optional        Flags the outcome to be attached to the tables row click event.
 
-- "DOUBLE-CLICK"        optional        Flags the outcome to be attached to the tables row double click event.
+- "action" = "DOUBLE-CLICK"        optional        Flags the outcome to be attached to the tables row double click event.

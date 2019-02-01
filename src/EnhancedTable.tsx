@@ -212,66 +212,85 @@ class EnhancedTable extends React.Component<any, any>
         }
 
         //body
-        for (pos = 0; pos < flowModel.objectData.length ; pos++)
+        if(flowModel.objectData)
         {
-            row=flowModel.objectData[pos];
+            for (pos = 0; pos < flowModel.objectData.length ; pos++)
+            {
+                row=flowModel.objectData[pos];
 
-            rowId = manywho.utils.getObjectDataProperty(row.properties, this.getAttribute("Row Key")).contentValue;
-            vals = [];
+                rowId = manywho.utils.getObjectDataProperty(row.properties, this.getAttribute("Row Key")).contentValue;
+                vals = [];
 
-            //if the rowid is in selected then show checked
-            var checked : any;
-            if(this.selectedItems.indexOf(rowId) < 0)
-            {
-                checked = false;
-            }
-            else
-            {
-                checked = true;
-            }
-
-            //add either the check boxes or row buttons
-            if(flowModel.isMultiSelect)
-            {
-                vals.push(<td className="et-table-cell-checkbox"><input className="et-table-checkbox" type="checkbox" checked={checked} onClick={this.toggleSelectItem.bind(this)}></input></td>);
-            }
-            else
-            {
-                vals.push(<td className="et-table-cell">{rowButtons}</td>);
-            }
-
-            
-            
-            for(var iPos = 0 ; iPos < row.properties.length ; iPos++)
-            {
-                colDef = cols[row.properties[iPos].developerName];
-                if( colDef && colDef.isDisplayValue)
+                //if the rowid is in selected then show checked
+                var checked : any;
+                if(this.selectedItems.indexOf(rowId) < 0)
                 {
-                    vals.push(<td className="et-table-cell">{row.properties[iPos].contentValue}</td>);
+                    checked = false;
                 }
-            }
+                else
+                {
+                    checked = true;
+                }
 
-            var className = "et-table-row";
-            if(this.selectedItems && this.selectedItems.indexOf(rowId) >=0)
-            {
-                className += " et-table-row-selected";
-            }
+                //add either the check boxes or row buttons
+                if(flowModel.isMultiSelect)
+                {
+                    vals.push(<td className="et-table-cell-checkbox"><input className="et-table-checkbox" type="checkbox" checked={checked} onClick={this.toggleSelectItem.bind(this)}></input></td>);
+                }
+                else
+                {
+                    if(rowButtons.length > 0)
+                    {
+                        vals.push(<td className="et-table-cell">{rowButtons}</td>);
+                    }
+                }
 
-            var title = "";
-            if(flowModel.isMultiSelect == true)
-            {
-                title= "Click to select, Double-Click to open";
-            }
-            else
-            {
-                title= "Click to select";
-            }
-            //create row object, note we are binding select to its click and the dblclick value (an outcome id) to double click.  It may be null but thats fine
-            var r = <tr className={className} data-rowId={rowId} data-objectData={row} 
-                        onClick={this.selectRow.bind(this,click)} 
-                        onDoubleClick={this.triggerOutcome.bind(this,dblClick)}
-                        title={title}>{vals}</tr>;
+                
+                
+                for(var iPos = 0 ; iPos < row.properties.length ; iPos++)
+                {
+                    colDef = cols[row.properties[iPos].developerName];
+                    if( colDef && colDef.isDisplayValue)
+                    {
+                        if(colDef.componentType == "")
+                        {
+                            vals.push(<td className="et-table-cell">{row.properties[iPos].contentValue}</td>);
+                        }
+                        else
+                        {
+                            var component = React.createElement(manywho.component.getByName(colDef.componentType), row.properties[iPos], null);
+                            vals.push(<td className="et-table-cell">{component}</td>);
+                        }
+                    }
+                }
 
+                var className = "et-table-row";
+                if(this.selectedItems && this.selectedItems.indexOf(rowId) >=0)
+                {
+                    className += " et-table-row-selected";
+                }
+
+                var title = "";
+                if(flowModel.isMultiSelect == true)
+                {
+                    title= "Click to select, Double-Click to open";
+                }
+                else
+                {
+                    title= "Click to select";
+                }
+                //create row object, note we are binding select to its click and the dblclick value (an outcome id) to double click.  It may be null but thats fine
+                var r = <tr className={className} data-rowId={rowId} data-objectData={row} 
+                            onClick={this.selectRow.bind(this,click)} 
+                            onDoubleClick={this.triggerOutcome.bind(this,dblClick)}
+                            title={title}>{vals}</tr>;
+
+                rows.push(r);
+            }
+        }
+        else
+        {
+            var r = <tr className={className}><td colSpan={Object.keys(cols).length}>No Work Items</td></tr>;
             rows.push(r);
         }
 
@@ -336,7 +355,7 @@ class EnhancedTable extends React.Component<any, any>
 
                 if(outcome)
                 {
-                    manywho.component.onOutcome(outcome, null , this.flowKey);
+                    manywho.component.onOutcome(outcome, objectDataArray , this.flowKey);
                 }
             }
         }
